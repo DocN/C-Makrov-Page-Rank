@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 
+
 using namespace std;
 //Matrix default constructor
 Matrix::Matrix() {
@@ -529,22 +530,104 @@ void Matrix::importance() {
 Matrix* Matrix::generateQMatrix() {
 	//create a q matrix
 	Matrix * qMatrix = new Matrix(matrixSize);
-	double qVal = (((double)1) / (((double)matrixSize)*((double)matrixSize)));
+	double qVal = (0.15) * (((double)1) / (((double)matrixSize)));
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {
 			qMatrix->set_Value(i, j, qVal);
 		}
 	}
+	cout << "q matrix" << endl;
 	cout << *qMatrix << endl;
 	return qMatrix;
 }
 
-void Matrix::convertToMMatrix() {
+void Matrix::setZeros() {
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {
-
+			myMatrix[i][j] = 0;
 		}
 	}
+}
+
+void Matrix::convertToMMatrix() {
+	Matrix * qMatrix = generateQMatrix();
+	//do stuff before matrix multi
+	for (int i = 0; i < matrixSize; i++) {
+		for (int j = 0; j < matrixSize; j++) {
+			myMatrix[i][j] =  (P_VALUE * myMatrix[i][j]);
+		}
+	}
+
+
+	Matrix result = *this + *qMatrix;
+	copyToThisMatrix(&result);
+}
+
+void Matrix::markov() {
+	double * traverseMarkov = new double[matrixSize];
+	for (int i = 0; i < matrixSize; i++) {
+		traverseMarkov[i] = INITIAL_RANK;
+	}
+	double * lastMarkov = new double[matrixSize];
+	copyArray(lastMarkov, traverseMarkov);
+
+	do {
+		double * results = new double[matrixSize];
+		copyArray(lastMarkov, traverseMarkov);
+		for (int i = 0; i < matrixSize; i++) {
+			double total = 0;
+			for (int j = 0; j < matrixSize; j++) {
+				total = total + (myMatrix[i][j] * traverseMarkov[j]);
+			}
+			results[i] = total;
+		}
+		copyArray(traverseMarkov, results);
+		printRankArray(traverseMarkov);
+	} while (compareRank(lastMarkov, traverseMarkov));
+}
+
+bool Matrix::compareRank(double * cur, double *last) {
+	for (int i = 0; i < matrixSize; i++) {
+		double difference = cur[i] - last[i];
+		difference = fabs(difference);
+		if (difference < 0.00001) {
+			return false;
+		}
+	}
+	return true;
+}
+void Matrix::copyArray(double * a1, double * a2) {
+	for (int i = 0; i < matrixSize; i++) {
+		a1[i] = a2[i];
+	}
+}
+
+void Matrix::printRankArray(double * A) {
+	for (int i = 0; i < matrixSize; i++) {
+		cout << A[i] << endl;
+	}
+	cout << "------" << endl;
+}
+void Matrix::copyToThisMatrix(Matrix * temp) {
+	for (int i = 0; i < matrixSize; i++) {
+		for (int j = 0; j < matrixSize; j++) {
+			myMatrix[i][j] = temp->get_Value(i, j);
+		}
+	}
+}
+
+Matrix* Matrix::matrixMulti(Matrix * m1, Matrix * m2) {
+	Matrix * tempMatrix = new Matrix(matrixSize);
+	tempMatrix->setZeros();
+	for (int i = 0; i < matrixSize; i++) {
+		for (int j = 0; j < matrixSize; j++) {
+			for (int k = 0; k < matrixSize; k++) {
+				double val = tempMatrix->get_Value(i, j) + (myMatrix[i][k] *m2->get_Value(k, j));
+				tempMatrix->set_Value(i, j, val);
+			}
+		}
+	}
+	return tempMatrix;
 }
 
 

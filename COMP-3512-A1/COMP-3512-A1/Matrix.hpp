@@ -41,8 +41,18 @@ public:
 	void importance();
 	Matrix * generateQMatrix();
 	void convertToMMatrix();
+	void setZeros();
+	void copyToThisMatrix(Matrix *);
+	Matrix* matrixMulti(Matrix * m1, Matrix * m2);
+	void markov();
+	void copyArray(double *, double *);
+	void printRankArray(double *);
+	bool compareRank(double *, double *);
+	void resetResultsArray(double *);
 private:
 	static const int DEFAULT_SIZE = 1;
+	static const int INITIAL_RANK = 1;
+	const double P_VALUE = 0.85;
 	double  ** myMatrix;
 	int matrixSize;
 
