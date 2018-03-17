@@ -536,8 +536,6 @@ Matrix* Matrix::generateQMatrix() {
 			qMatrix->set_Value(i, j, qVal);
 		}
 	}
-	cout << "q matrix" << endl;
-	cout << *qMatrix << endl;
 	return qMatrix;
 }
 
@@ -563,7 +561,7 @@ void Matrix::convertToMMatrix() {
 	copyToThisMatrix(&result);
 }
 
-void Matrix::markov() {
+double * Matrix::markov() {
 	double * traverseMarkov = new double[matrixSize];
 	for (int i = 0; i < matrixSize; i++) {
 		traverseMarkov[i] = INITIAL_RANK;
@@ -584,8 +582,19 @@ void Matrix::markov() {
 		copyArray(traverseMarkov, results);
 		printRankArray(traverseMarkov);
 	} while (compareRank(lastMarkov, traverseMarkov));
+	return traverseMarkov;
 }
 
+void Matrix::rankCalculateProb(double * ranks) {
+	double total = 0;
+	for (int i = 0; i < matrixSize; i++) {
+		total = total + ranks[i];
+	}
+	total = total / matrixSize;
+	for (int i = 0; i < matrixSize; i++) {
+		ranks[i] = ranks[i] / matrixSize;
+	}
+}
 bool Matrix::compareRank(double * cur, double *last) {
 	for (int i = 0; i < matrixSize; i++) {
 		double difference = cur[i] - last[i];
@@ -603,8 +612,11 @@ void Matrix::copyArray(double * a1, double * a2) {
 }
 
 void Matrix::printRankArray(double * A) {
+	char letter = 'A';
 	for (int i = 0; i < matrixSize; i++) {
+		cout << letter << ": ";
 		cout << A[i] << endl;
+		letter++;
 	}
 	cout << "------" << endl;
 }
@@ -629,6 +641,8 @@ Matrix* Matrix::matrixMulti(Matrix * m1, Matrix * m2) {
 	}
 	return tempMatrix;
 }
+
+
 
 
 

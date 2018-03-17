@@ -1,15 +1,36 @@
 #include<iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <vector>
 #include "Matrix.hpp"
+
 using namespace std;
 
 int main() {
-	int foo[16] = { 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 };
-	Matrix * test = new Matrix(foo, 16);
+	ifstream infile;
+	infile.open("tester.txt");
+	vector<int> numbers;
+	int counter = 0;
+	if (infile.is_open())
+	{
+		int num;
+		while (infile >> num)
+		{
+			numbers.push_back(num);
+		}
+	}
+
+	infile.close();
+	int * a = &numbers[0];
+	Matrix * test = new Matrix(a, numbers.size());
 	test->printMatrix();
 	test->importance();
 	test->generateQMatrix();
 	test->convertToMMatrix();
-	test->markov();
+	double * result = test->markov();
+	test->rankCalculateProb(result);
+	test->printRankArray(result);
 	system("PAUSE");
 	return 0;
 }
