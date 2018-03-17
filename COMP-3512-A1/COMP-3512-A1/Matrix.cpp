@@ -9,7 +9,7 @@ using namespace std;
 //Matrix default constructor
 Matrix::Matrix() {
 	//create object and allocate space
-	myMatrix = new int*[DEFAULT_SIZE];
+	myMatrix = new double*[DEFAULT_SIZE];
 	allocateArray(DEFAULT_SIZE);
 	matrixSize = DEFAULT_SIZE;
 	//store zero into the 1/1 grid
@@ -34,7 +34,7 @@ Matrix::Matrix(int A[], int n) {
 		cout << "invalid number of elements, made 1 by 1 matrix " << endl;
 	}
 	//create matrix and allocate with dimensions 
-	myMatrix = new int*[dimension];
+	myMatrix = new double*[dimension];
 	allocateArray(dimension);
 	matrixSize = dimension;
 	fillMatrix(A, n);
@@ -48,7 +48,7 @@ int dimension  - The dimensions of Matrix
 N/A
 */
 Matrix::Matrix(int dimension) {
-	myMatrix = new int*[dimension];
+	myMatrix = new double*[dimension];
 	allocateArray(dimension);
 	matrixSize = dimension;
 }
@@ -77,7 +77,7 @@ void
 void Matrix::allocateArray(int dimension) {
 	//loop through the pointer array and allocate an array for each pointer
 	for (int i = 0; i < dimension; i++) {
-		myMatrix[i] = new int[dimension];
+		myMatrix[i] = new double[dimension];
 	}
 }
 
@@ -125,7 +125,7 @@ int value - the value we're storing at the cell
 -Output
 void
 */
-void Matrix::set_Value(int x, int y, int value) {
+void Matrix::set_Value(int x, int y, double value) {
 	myMatrix[x][y] = value;
 }
 
@@ -137,7 +137,7 @@ int y - the coordinate on the y axis
 -Output
 int - the value at the specified coordinates
 */
-int Matrix::get_Value(int x, int y) {
+double Matrix::get_Value(int x, int y) {
 	return myMatrix[x][y];
 }
 
@@ -326,7 +326,7 @@ Matrix - preincremented Matrix
 Matrix& Matrix::operator++() {
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {
-			int currentVal = get_Value(i, j) + 1;
+			double currentVal = get_Value(i, j) + 1;
 			set_Value(i, j, currentVal);
 		}
 	}
@@ -343,7 +343,7 @@ Matrix - post incremented Matrix
 Matrix& Matrix::operator++(int) {
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {
-			int currentVal = get_Value(i, j) + 1;
+			double currentVal = get_Value(i, j) + 1;
 			set_Value(i, j, currentVal);
 		}
 	}
@@ -359,7 +359,7 @@ Matrix - predeincremented Matrix
 Matrix& Matrix::operator--() {
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {
-			int currentVal = get_Value(i, j) - 1;
+			double currentVal = get_Value(i, j) - 1;
 			set_Value(i, j, currentVal);
 		}
 	}
@@ -376,7 +376,7 @@ Matrix - post deincremented Matrix
 Matrix& Matrix::operator--(int) {
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {
-			int currentVal = get_Value(i, j) - 1;
+			double currentVal = get_Value(i, j) - 1;
 			set_Value(i, j, currentVal);
 		}
 	}
@@ -427,7 +427,7 @@ Matrix& Matrix::operator+=(Matrix& rhs) {
 		//loop through all the elements from each Matrix and sum them.
 		for (int i = 0; i < matrixSize; i++) {
 			for (int j = 0; j < matrixSize; j++) {
-				int newVal = myMatrix[i][j] + rhs.myMatrix[i][j];
+				double newVal = myMatrix[i][j] + rhs.myMatrix[i][j];
 				set_Value(i, j, newVal);
 			}
 		}
@@ -450,7 +450,7 @@ Matrix& Matrix::operator-=(Matrix& rhs) {
 		//loop through all the values in the cells and subtract them
 		for (int i = 0; i < matrixSize; i++) {
 			for (int j = 0; j < matrixSize; j++) {
-				int newVal = myMatrix[i][j] - rhs.myMatrix[i][j];
+				double newVal = myMatrix[i][j] - rhs.myMatrix[i][j];
 				set_Value(i, j, newVal);
 			}
 		}
@@ -473,7 +473,7 @@ Matrix& operator+(const Matrix& a, const Matrix& b) {
 		//loop through all the cells and sum them
 		for (int i = 0; i < a.matrixSize; i++) {
 			for (int j = 0; j < a.matrixSize; j++) {
-				int newVal = a.myMatrix[i][j] + b.myMatrix[i][j];
+				double newVal = a.myMatrix[i][j] + b.myMatrix[i][j];
 				newMatrix->myMatrix[i][j] = newVal;
 			}
 		}
@@ -496,11 +496,56 @@ Matrix& operator-(const Matrix& a, const Matrix& b) {
 		//loop through all the values and do the work
 		for (int i = 0; i < a.matrixSize; i++) {
 			for (int j = 0; j < a.matrixSize; j++) {
-				int newVal = a.myMatrix[i][j] - b.myMatrix[i][j];
+				double newVal = a.myMatrix[i][j] - b.myMatrix[i][j];
 				newMatrix->myMatrix[i][j] = newVal;
 			}
 		}
 	}
 	return *newMatrix;
 }
+
+void Matrix::importance() {
+	//loop through and make the S matrix
+	for (int i = 0; i < matrixSize; i++) {
+		double total = 0;
+		for (int j = 0; j < matrixSize; j++) {
+			total = total + myMatrix[j][i];
+		}
+		//do the division and store it
+		for (int j = 0; j < matrixSize; j++) {
+			//don't divide by zero D:
+			if (total == 0) {
+				double value = ((double)1 / (double)matrixSize);
+				myMatrix[j][i] = value;
+			}
+			else {
+				myMatrix[j][i] = myMatrix[j][i] / total;
+			}
+			
+		}
+	}
+}
+
+Matrix* Matrix::generateQMatrix() {
+	//create a q matrix
+	Matrix * qMatrix = new Matrix(matrixSize);
+	double qVal = (((double)1) / (((double)matrixSize)*((double)matrixSize)));
+	for (int i = 0; i < matrixSize; i++) {
+		for (int j = 0; j < matrixSize; j++) {
+			qMatrix->set_Value(i, j, qVal);
+		}
+	}
+	cout << *qMatrix << endl;
+	return qMatrix;
+}
+
+void Matrix::convertToMMatrix() {
+	for (int i = 0; i < matrixSize; i++) {
+		for (int j = 0; j < matrixSize; j++) {
+
+		}
+	}
+}
+
+
 
