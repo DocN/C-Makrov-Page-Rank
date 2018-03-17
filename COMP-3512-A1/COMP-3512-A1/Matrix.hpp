@@ -43,7 +43,6 @@ public:
 	void convertToMMatrix();
 	void setZeros();
 	void copyToThisMatrix(Matrix *);
-	Matrix* matrixMulti(Matrix * m1, Matrix * m2);
 	double * markov();
 	void rankCalculateProb(double *);
 	void copyArray(double *, double *);

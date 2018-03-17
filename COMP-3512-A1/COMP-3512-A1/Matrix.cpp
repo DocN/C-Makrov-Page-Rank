@@ -505,6 +505,13 @@ Matrix& operator-(const Matrix& a, const Matrix& b) {
 	return *newMatrix;
 }
 
+/*
+importance - sets up the importance matrix
+Input
+	N/A
+Output
+	void
+*/
 void Matrix::importance() {
 	//loop through and make the S matrix
 	for (int i = 0; i < matrixSize; i++) {
@@ -527,6 +534,13 @@ void Matrix::importance() {
 	}
 }
 
+/*
+generateQMatrix - generates a Q Matrix for the search algo problem
+Input
+	N/A
+Output
+	Matrix * - matrix pointer to a Q matrix
+*/
 Matrix* Matrix::generateQMatrix() {
 	//create a q matrix
 	Matrix * qMatrix = new Matrix(matrixSize);
@@ -539,6 +553,13 @@ Matrix* Matrix::generateQMatrix() {
 	return qMatrix;
 }
 
+/*
+setZeros - sets all the values in the matrix to 0 
+Input
+	N/A
+Output
+	void
+*/
 void Matrix::setZeros() {
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {
@@ -547,6 +568,13 @@ void Matrix::setZeros() {
 	}
 }
 
+/*
+convertToMMatrix - converts a matrix to the M matrix format required by the search algo
+Input
+	N/A
+Output
+	void
+*/
 void Matrix::convertToMMatrix() {
 	Matrix * qMatrix = generateQMatrix();
 	//do stuff before matrix multi
@@ -555,23 +583,37 @@ void Matrix::convertToMMatrix() {
 			myMatrix[i][j] =  (P_VALUE * myMatrix[i][j]);
 		}
 	}
-
-
+	//sum the TransitionMatrix with the StochasticMatrix
 	Matrix result = *this + *qMatrix;
 	copyToThisMatrix(&result);
 }
 
+/*
+markov - execute the markov function until we reach equalibrium 
+Input
+	N/A
+Output
+	double * - array of ranks 
+*/
 double * Matrix::markov() {
+	//create a traversal markov from running through data
 	double * traverseMarkov = new double[matrixSize];
+	//setup initial traversal values
 	for (int i = 0; i < matrixSize; i++) {
 		traverseMarkov[i] = INITIAL_RANK;
 	}
+	//copy the values to another rank list to compare each markov run
 	double * lastMarkov = new double[matrixSize];
 	copyArray(lastMarkov, traverseMarkov);
 
+	//do until we reach a good equalibrium 
 	do {
+		//store results in a rank array
 		double * results = new double[matrixSize];
+		//copy the current traversal to the last one for reference
 		copyArray(lastMarkov, traverseMarkov);
+
+		//run another makrov iteration
 		for (int i = 0; i < matrixSize; i++) {
 			double total = 0;
 			for (int j = 0; j < matrixSize; j++) {
@@ -580,21 +622,41 @@ double * Matrix::markov() {
 			results[i] = total;
 		}
 		copyArray(traverseMarkov, results);
+		//show current makrov
 		printRankArray(traverseMarkov);
 	} while (compareRank(lastMarkov, traverseMarkov));
 	return traverseMarkov;
 }
 
+/*
+rankCalculateProb - calculate the probability out of 1 
+Input
+	double * rank - array of doubles 
+Output
+	void
+*/
 void Matrix::rankCalculateProb(double * ranks) {
 	double total = 0;
+	//sum the total of all ranks
 	for (int i = 0; i < matrixSize; i++) {
 		total = total + ranks[i];
 	}
+	//divide by number of elements
 	total = total / matrixSize;
+	//divide each one 
 	for (int i = 0; i < matrixSize; i++) {
 		ranks[i] = ranks[i] / matrixSize;
 	}
 }
+
+/*
+compareRank - For comparing the last rank to the current one to see if we've reached equalibrium
+Input
+	double * cur - the current ranking table
+	double *last - the previous ranking table
+Output
+	bool - result if we've reached desired makrov result
+*/
 bool Matrix::compareRank(double * cur, double *last) {
 	for (int i = 0; i < matrixSize; i++) {
 		double difference = cur[i] - last[i];
@@ -605,41 +667,51 @@ bool Matrix::compareRank(double * cur, double *last) {
 	}
 	return true;
 }
+
+/*
+copyArray - Copies the values of one array to another.
+Input	
+	double * a1 - first array
+	double * a2 - second array
+Output
+	void
+*/
 void Matrix::copyArray(double * a1, double * a2) {
 	for (int i = 0; i < matrixSize; i++) {
 		a1[i] = a2[i];
 	}
 }
 
-void Matrix::printRankArray(double * A) {
+/*
+printRankArray - prints the rank rank list A 
+Input
+	double * rank - rank array we're printing
+Output
+	void
+*/
+void Matrix::printRankArray(double * rank) {
 	char letter = 'A';
 	for (int i = 0; i < matrixSize; i++) {
 		cout << letter << ": ";
-		cout << A[i] << endl;
+		cout << rank[i] << endl;
 		letter++;
 	}
 	cout << "------" << endl;
 }
+
+/*
+copyToThisMatrix - Takes all the values from the temp matrix and sets the values in myMatrix
+Input
+	Matrix * temp - the matrix we're taking values from
+Output
+	void
+*/
 void Matrix::copyToThisMatrix(Matrix * temp) {
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {
 			myMatrix[i][j] = temp->get_Value(i, j);
 		}
 	}
-}
-
-Matrix* Matrix::matrixMulti(Matrix * m1, Matrix * m2) {
-	Matrix * tempMatrix = new Matrix(matrixSize);
-	tempMatrix->setZeros();
-	for (int i = 0; i < matrixSize; i++) {
-		for (int j = 0; j < matrixSize; j++) {
-			for (int k = 0; k < matrixSize; k++) {
-				double val = tempMatrix->get_Value(i, j) + (myMatrix[i][k] *m2->get_Value(k, j));
-				tempMatrix->set_Value(i, j, val);
-			}
-		}
-	}
-	return tempMatrix;
 }
 
 
