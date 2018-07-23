@@ -1,2 +1,1 @@
-# COMP-3512-Assignment1
-A1
+C++ Makrov Page Rank Algorithm 
